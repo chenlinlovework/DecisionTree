@@ -1,0 +1,73 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import tree
+from sklearn.model_selection import train_test_split
+
+
+##----------------------------------------读取数据----------------------------------------##
+
+data_org=pd.read_csv('data_clean.csv').drop(columns=['Unnamed: 0','uid','ds','source'])
+data_org=data_org.fillna(0)
+# print(data_org.head()
+
+##----------------------------------------初始化----------------------------------------##
+
+X=data_org.drop(columns='remain')
+y=data_org['remain']
+
+
+
+feature_name=[column for column in X]
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.3)
+
+model=tree.DecisionTreeClassifier(criterion='gini',random_state=30,splitter='best',max_depth=3)
+model_data=model.fit(X_train,y_train)
+model_score=model.score(X_test,y_test)
+
+
+
+
+##---------------------------------------- 确定一下超参数的曲线 ----------------------------------------##
+#
+# test = []
+# for i in range(10):
+#     model = tree.DecisionTreeClassifier(max_depth=i+1
+#                                       ,criterion="entropy"
+#                                       ,random_state=30
+#                                       ,splitter="random"
+#                                       )
+#     model = model.fit(X_train, y_train)
+#     score = model.score(X_test, y_test)
+#     test.append(score)
+# plt.plot(range(1,11),test,color="red",label="max_depth")
+# plt.legend()
+# plt.show()
+#
+#
+# ##---------------------------------------- 结果输出 ----------------------------------------##
+
+print([*zip(feature_name,model_data.feature_importances_)])
+print(model_score)
+#
+
+
+
+##----------------------------------------决策树polt ----------------------------------------##
+import graphviz
+dot_data = tree.export_graphviz(model_data
+                                ,out_file=None
+                                ,feature_names= feature_name
+                                ,class_names=['次日没留存','次日留存']
+                                ,filled=True
+                                ,rounded=True
+                                )
+graph = graphviz.Source(dot_data)
+
+graph.save('tree')
+graph.render()
+
+
+
